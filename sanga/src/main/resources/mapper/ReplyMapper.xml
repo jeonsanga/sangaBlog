@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sample.mapper.ReplyMapper">
+
+	<!-- 댓글등록 -->
+	<insert id="enroll" parameterType="sample.vo.ReplyVO">
+		INSERT INTO board_reply
+			(content, bno,rating, bookId,  createdate, updatedate)
+		VALUES( #{content}, #{bno},#{rating} ,#{bookId},  now(), now());
+	</insert>
+	
+	<select id="list" resultType="sample.vo.ReplyVO">
+		select * from board_reply
+	</select>
+	
+	<!-- 댓글체크 -->
+		<select id="checkReply" resultType="integer">
+	
+		select rno board_reply 
+		where memberId = #{memberId} and bookId = #{bookId}
+	
+	</select>
+	
+	<!-- 대댓글 입력-->
+	<insert id="childReply">
+		INSERT INTO board_reply
+			(content, bno, bookId, rdepth, rgroup, createdate, updatedate)
+		VALUES( #{content}, #{bno},#{bookId},1,#{rno} , now(), now());
+	</insert>
+	
+	<!-- 댓글수정 -->
+  	<update id="updateReply">
+  	
+  		update board_reply set content = #{content}, rating = #{rating}
+  		where rno = #{rno}
+  		
+  	</update>
+	
+
+</mapper>

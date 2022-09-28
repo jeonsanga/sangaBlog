@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sample.mapper.BoardMappeer">
+
+
+	<select id="getBoardList" resultType="sample.vo.BoardVO">
+		SELECT 
+			bno,bookId, title, content, writer, regdate, updatedate
+		FROM sanga_board;
+	</select>
+	
+	<insert id="insertBoard" parameterType="sample.vo.BoardVO">
+		INSERT INTO  sanga_board
+			(bno,title, content, writer, regdate, updatedate,catecode)
+		VALUES(#{bno},#{title}, #{content}, #{writer}, now(), now(),#{catecode});
+	</insert>
+	
+	<select id="boardGetInfo" resultType="sample.vo.BoardVO">
+		SELECT 
+			bno,bookId, title, content, writer, regdate, updatedate
+		FROM sanga_board
+		WHERE bookId = #{bookId};
+	</select>
+	
+	<update id="boardModify">
+		UPDATE 
+			sanga_board
+		SET 
+			title=#{title}, content=#{content}, writer=NULL, regdate=now(), updatedate=now()
+		WHERE bno=#{bno}
+	</update>
+	
+	<delete id="boardDelete">
+		DELETE FROM sanga_board
+		WHERE bno=#{bno}
+	</delete>
+	
+	<select id="cateList" resultType="sample.vo.CateVO">
+		SELECT 
+			tier, cateName, cateCode
+		FROM cate_table;
+		
+	</select>
+	
+	<select id="cateSearchList" resultType="sample.vo.BoardVO">
+	 SELECT 
+				SB.bno,SB.bookId, SB.title, SB.content, SB.writer,CT.CATENAME 
+			FROM sanga_board SB left outer join CATE_TABLE CT on SB.CATECODE = CT.CATECODE 
+	WHERE CT.CATENAME = #{catename};
+	</select>
+
+	<!-- 이미지 등록 -->
+<!-- 	<insert id="imageEnroll">
+	
+		insert into vam_image(bno, fileName, uploadPath, uuid) values (#{bno}, #{fileName}, #{uploadPath}, #{uuid})
+	
+	</insert>
+	 -->
+	<insert id="imageEnroll" parameterType="java.util.List" >
+    INSERT INTO sanga_image
+    <selectKey resultType="int" keyProperty="bookId" order="BEFORE">
+  		
+  			SELECT MAX(bookId) FROM sanga_board
+  		
+  	</selectKey> 
+    
+      (bno,bookId, fileName, uploadPath, uuid)
+    
+    VALUES
+    
+    <foreach collection="list" item="item" index="index" separator=",">
+      (  #{item.bno}
+        ,#{bookId}
+        , #{item.fileName}
+        , #{item.uploadPath}
+        , #{item.uuid} )
+    </foreach>
+    
+</insert>
+
+		<!--이미지 출력  -->
+		<select id="ImageList" resultType="sample.vo.AttachImageVO">
+			SELECT bno, fileName, uploadPath, uuid
+				FROM SANGA_IMAGE 
+				WHERE  bookId=#{bookId}
+		</select>
+		
+		<!-- 이미지 db경로 삭제 -->
+		<delete id="deleteImage">
+			DELETE FROM SANGA_IMAGE
+			WHERE uuid=#{uuid}
+		</delete>
+</mapper>
